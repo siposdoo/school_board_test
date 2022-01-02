@@ -13,10 +13,10 @@
         $student->id =  $_GET['delete'] ;
         echo $student->id;
         if($student->deleteStudent()){
-            header('location:index.php');
+            header('location:../index.php');
         }
 
     }else{
-        header('location:index.php'); 
+        header('location:../index.php'); 
     }
 ?>

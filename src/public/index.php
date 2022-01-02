@@ -1,15 +1,26 @@
 <?php
  include_once '../config/database.php';
  include_once '../class/Student.php';
+ include_once '../class/SchoolBoard.php';
 
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $uri = explode('/', $uri);
 $database = new Database();
 $db = $database->getConnection();
 
- 
-$items = new Student($db);
+if(isset($_POST['add_student'])){
+$student = new Student($db);
+$student->name=$_POST['name'];
+$student->school_board=$_POST['s_board'];
+if($student->createStudent()){
+  header('location:index.php');
+}
+}
 
+$items = new Student($db);
+$sboard= new SchoolBoard($db);
+
+$allSboards=$sboard->getAll();
 $stmt = $items->getStudents();
 $itemCount = $stmt->rowCount();
 
@@ -130,7 +141,7 @@ else{
       <div class="row">
       <div class="col-md-12">
         <h3 class="text-center text-info">Add Student</h3>
-        <form action="action.php" method="post" enctype="multipart/form-data">
+        <form action="" method="post" enctype="multipart/form-data">
           
           <div class="form-group">
           <label for="name">Student name</label>
@@ -140,7 +151,13 @@ else{
           <div class="form-group">
           <label for="name">School board</label>
             <select   name="s_board"  class="form-control"  required>
-                <option></option>
+            <?php 
+
+while ($row = $allSboards->fetch(PDO::FETCH_ASSOC)){ 
+  extract($row);?>
+ 
+                <option value="<?= $id; ?>"><?= $name; ?></option>
+                <?php } ?>
             </select>
           </div>
            
@@ -202,7 +219,7 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)){
               <td><?= $school_board; ?> </td>
               <td> <?= $created_at; ?></td>
                <td>
-                 <a href="api/student.php?delete=" class="badge badge-danger p-2" onclick="return confirm('Do you want delete this record?');">Delete</a> 
+                 <a href="api/student.php?delete=<?= $id; ?>" class="badge badge-danger p-2" onclick="return confirm('Do you want delete this record?');">Delete</a> 
                </td>
             </tr>";
             <?php } ?>
