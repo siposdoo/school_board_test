@@ -48,10 +48,16 @@ if ($uri[1] == 'students' && !isset($uri[2])) {
 
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
       extract($row);
+      $sboard->id = $school_board;
+      $sboard->get();
+      $gradeTmp = new Grade($db);
       $e = array(
         "id" => $id,
         "name" => $name,
-        "school_board" => $school_board,
+        "school_board" => $sboard->name,
+        "AVG" => $gradeTmp->getAverageGradesForStudent($id),
+        "Grades" => $gradeTmp->getAllforStudent($id),
+        "Status" => $gradeTmp->checkPassOrFail($school_board, $id),
         "created_at" => $created_at
       );
 
@@ -73,22 +79,65 @@ if ($uri[1] == 'students' && isset($uri[2]) && (int)$uri[2] > 0) {
   $item->id =  $uri[2];
 
   $item->getStudent();
-  if ($item->name != null) {
-    // create array
-    $emp_arr = array(
-      "id" =>  $item->id,
-      "name" => $item->name,
-      "school_board" => $item->school_board,
-      "created_at" => $item->created_at
-    );
+  if ($item->school_board == 1) {
+    header('Content-Type: application/json');
 
-    http_response_code(200);
-    echo json_encode($emp_arr);
+    if ($item->name != null) {
+      // create array
+      $sboard->id = $item->school_board;
+      $sboard->get();
+      $gradeTmp = new Grade($db);
+      $emp_arr = array(
+        "id" =>  $item->id,
+        "name" => $item->name,
+        "school_board" => $sboard->name,
+        "AVG" => $gradeTmp->getAverageGradesForStudent($item->id),
+        "Grades" => $gradeTmp->getAllforStudent($item->id),
+        "Status" => $gradeTmp->checkPassOrFail($item->school_board, $item->id),
+        "created_at" => $item->created_at
+      );
+
+      http_response_code(200);
+      echo json_encode($emp_arr);
+    } else {
+      http_response_code(404);
+      echo json_encode("Student not found.");
+    }
+    exit;
   } else {
-    http_response_code(404);
-    echo json_encode("Student not found.");
+
+
+    if ($item->name != null) {
+      header("Content-type: text/xml");
+
+      // create array
+      $sboard->id = $item->school_board;
+      $sboard->get();
+      $gradeTmp = new Grade($db);
+      $xml_output = "<?xml version=\"1.0\"?>\n";
+      $xml_output .= "\t<student>\n";
+      $xml_output .= "\t<id>" . $item->id . "</id>\n";
+      $xml_output .= "\t<name>" . $item->name . "</name>\n";
+      $xml_output .= "\t<school_board>" . $item->school_board . "</school_board>\n";
+      $xml_output .= "\t<AVG>" . $gradeTmp->getAverageGradesForStudent($item->id) . "</AVG>\n";
+      $xml_output .= "\t<Grades>";
+      foreach($gradeTmp->getAllforStudent($item->id) as $grade){
+       $xml_output .= "\t<grade>" . $grade. "</grade>\n";
+      }
+       $xml_output .="</Grades>\n";
+      $xml_output .= "\t<Status>" . $gradeTmp->checkPassOrFail($item->school_board, $item->id) . "</Status>\n";
+    
+     
+
+      $xml_output .= "\t</student>\n";
+      
+      echo $xml_output;
+    } else {
+      http_response_code(404);
+      echo json_encode("Student not found.");
+    }
+    exit;
   }
-  exit;
 }
 
 ?>
@@ -185,13 +234,13 @@ if ($uri[1] == 'students' && isset($uri[2]) && (int)$uri[2] > 0) {
 
             <div class="form-group">
               <select name="student_id" class="form-control" required>
-              <?php 
-               while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                extract($row);
+                <?php
+                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                  extract($row);
                 ?>
-                <option value="<?= $id; ?>"><?= $name; ?></option>
-                <?php 
-             }
+                  <option value="<?= $id; ?>"><?= $name; ?></option>
+                <?php
+                }
                 ?>
               </select>
             </div>
@@ -222,21 +271,21 @@ if ($uri[1] == 'students' && isset($uri[2]) && (int)$uri[2] > 0) {
           </thead>
           <tbody>
             <?php
-              $stmt = $items->getStudents();
-              while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $stmt = $items->getStudents();
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
               extract($row);
-              $sboard->id=$school_board;
+              $sboard->id = $school_board;
               $sboard->get();
               $gradeTmp = new Grade($db);
-              
 
 
-              ?>
+
+            ?>
 
               <tr>
                 <td><?= $id; ?> </td>
                 <td> <?= $name; ?></td>
-                <td> <?=$gradeTmp->getAverageGradesForStudent($id); ?></td>
+                <td> <?= $gradeTmp->getAverageGradesForStudent($id); ?></td>
                 <td><?= $sboard->name; ?> </td>
                 <td> <?= $created_at; ?></td>
                 <td>
