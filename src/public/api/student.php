@@ -11,7 +11,7 @@
     if(isset($_GET['delete']) && $_GET['delete'] >0){
         $student = new Student($db);
         $student->id =  $_GET['delete'] ;
-        echo $student->id;
+        
         if($student->deleteStudent()){
             header('location:../index.php');
         }
