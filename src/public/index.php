@@ -1,5 +1,5 @@
 <?php
-include_once '../config/database.php';
+include_once '../config/Database.php';
 include_once '../class/Student.php';
 include_once '../class/SchoolBoard.php';
 include_once '../class/Grade.php';
