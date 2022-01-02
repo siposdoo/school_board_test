@@ -111,9 +111,7 @@ else{
         <li class="nav-item">
           <a class="nav-link" href="/">HOME</a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/endpoints">Endpoints</a>
-        </li>
+        
         
       </ul>
     </div>
@@ -135,10 +133,12 @@ else{
         <form action="action.php" method="post" enctype="multipart/form-data">
           
           <div class="form-group">
+          <label for="name">Student name</label>
             <input type="text" name="name" value="" class="form-control" placeholder="Enter name" required>
           </div>
           
           <div class="form-group">
+          <label for="name">School board</label>
             <select   name="s_board"  class="form-control"  required>
                 <option></option>
             </select>
@@ -147,7 +147,7 @@ else{
           <div class="form-group">
             
              
-            <input type="submit" name="add" class="btn btn-primary btn-block" value="Add Record">
+            <input type="submit" name="add_student" class="btn btn-primary btn-block" value="Add Student">
             
           </div>
         </form>
@@ -155,7 +155,7 @@ else{
             </div>
             <div class="col-md-12">
         <h3 class="text-center text-info">Add Grade</h3>
-        <form action="action.php" method="post" enctype="multipart/form-data">
+        <form action="" method="post" enctype="multipart/form-data">
           
           <div class="form-group">
             <input type="number" name="grade" value="" class="form-control" placeholder="Enter grade" required>
@@ -170,7 +170,7 @@ else{
           <div class="form-group">
             
              
-            <input type="submit" name="add" class="btn btn-primary btn-block" value="Add Grade">
+            <input type="submit" name="add_grade" class="btn btn-primary btn-block" value="Add Grade">
             
           </div>
         </form>
@@ -191,17 +191,21 @@ else{
             </tr>
           </thead>
           <tbody>
-             
+             <?php 
+
+while ($row = $stmt->fetch(PDO::FETCH_ASSOC)){ 
+  extract($row);?>
+ 
             <tr>
-              <td> </td>
-              <td> </td>
-              <td> </td>
-              <td> </td>
+              <td><?= $id; ?> </td>
+              <td> <?= $name; ?></td>
+              <td><?= $school_board; ?> </td>
+              <td> <?= $created_at; ?></td>
                <td>
-                <a href="details.php?details=" class="badge badge-primary p-2">Check grades</a> |
-                <a href="action.php?delete=" class="badge badge-danger p-2" onclick="return confirm('Do you want delete this record?');">Delete</a> |
+                 <a href="api/student.php?delete=" class="badge badge-danger p-2" onclick="return confirm('Do you want delete this record?');">Delete</a> 
                </td>
-            </tr>
+            </tr>";
+            <?php } ?>
            
           </tbody>
         </table>
